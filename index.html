@@ -123,6 +123,15 @@
   .btn-ghost:hover{border-color:var(--blue);color:var(--blue-2);transform:translateY(-3px);}
 
   .hero-photo{position:relative;display:flex;justify-content:center;}
+  .rain-canvas{
+    position:absolute;
+    top:50%;left:50%;transform:translate(-50%,-50%);
+    width:480px;height:560px;
+    z-index:0;pointer-events:none;
+    opacity:.55;
+    mask-image:radial-gradient(ellipse 55% 55% at 50% 50%, transparent 40%, black 78%);
+    -webkit-mask-image:radial-gradient(ellipse 55% 55% at 50% 50%, transparent 40%, black 78%);
+  }
   .ring{
     position:absolute;border-radius:50%;border:1px solid var(--blue-dim);
     animation:spin 26s linear infinite;
@@ -293,6 +302,7 @@
       </div>
     </div>
     <div class="hero-photo">
+      <canvas id="rainCanvas" class="rain-canvas"></canvas>
       <div class="ring r1"></div>
       <div class="ring r2"></div>
       <div class="photo-frame">
@@ -440,6 +450,52 @@
     <div>حلول رقمية ذكية لنجاح أعمالك &nbsp;•&nbsp; © 2026 جميع الحقوق محفوظة</div>
   </div>
 </footer>
+
+<script>
+(function(){
+  var canvas = document.getElementById('rainCanvas');
+  if(!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var cols, drops, fontSize = 16;
+  var chars = '01';
+
+  function resize(){
+    var rect = canvas.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    cols = Math.floor(rect.width / fontSize);
+    drops = new Array(cols).fill(0).map(function(){ return Math.random() * -40; });
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  if (reduceMotion) return;
+
+  function draw(){
+    var rect = canvas.getBoundingClientRect();
+    ctx.fillStyle = 'rgba(5,9,18,0.14)';
+    ctx.fillRect(0,0,rect.width,rect.height);
+    ctx.font = fontSize + 'px monospace';
+    for (var i = 0; i < cols; i++){
+      var char = chars[Math.floor(Math.random()*chars.length)];
+      var x = i * fontSize;
+      var y = drops[i] * fontSize;
+      var grad = Math.random();
+      ctx.fillStyle = grad > 0.85 ? 'rgba(180,225,255,0.95)' : 'rgba(30,127,255,0.75)';
+      ctx.fillText(char, x, y);
+      if (y > rect.height && Math.random() > 0.975){
+        drops[i] = 0;
+      }
+      drops[i]++;
+    }
+  }
+  setInterval(draw, 55);
+})();
+</script>
 
 </body>
 </html>
